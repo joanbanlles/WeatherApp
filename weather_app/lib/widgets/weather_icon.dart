@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class WeatherIcon extends StatelessWidget {
-  final String iconCode;
+  final String iconUrl;
   final double size;
 
-  const WeatherIcon({super.key, required this.iconCode, this.size = 50});
+  const WeatherIcon({
+    super.key,
+    required this.iconUrl,
+    this.size = 48,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      'https://openweathermap.org/img/wn/$iconCode@2x.png',
+    return CachedNetworkImage(
+      imageUrl: 'https:$iconUrl', // Corregida interpolación de string
       width: size,
       height: size,
-      fit: BoxFit.cover,
+      placeholder: (context, url) => SizedBox(
+        width: size,
+        height: size,
+        child: const CircularProgressIndicator(strokeWidth: 2),
+      ),
+      errorWidget: (context, url, error) => Icon(
+        Icons.error_outline,
+        size: size,
+        color: Colors.red.shade300,
+      ),
     );
   }
 }

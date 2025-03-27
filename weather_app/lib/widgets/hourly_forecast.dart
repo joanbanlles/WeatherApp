@@ -1,3 +1,4 @@
+// widgets/hourly_forecast.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/weather_data.dart';
@@ -29,11 +30,11 @@ class HourlyForecastWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Column(
                   children: [
-                    Text(DateFormat('h a').format(hour.dt)),
+                    Text(DateFormat('h a').format(hour.time)),
                     const SizedBox(height: 4),
-                    WeatherIcon(iconCode: hour.icon, size: 30),
+                    WeatherIcon(iconUrl: hour.conditionIcon, size: 30),
                     const SizedBox(height: 4),
-                    Text('${hour.temp.round()}°'),
+                    Text('${hour.tempC.round()}°'),
                   ],
                 ),
               );

@@ -17,9 +17,7 @@ class CurrentWeatherWidget extends StatelessWidget {
     return SingleChildScrollView(
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         color: const Color(0xFF1D1E33),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -49,10 +47,7 @@ class CurrentWeatherWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  WeatherIcon(
-                    iconUrl: current.conditionIcon,
-                    size: 64,
-                  ),
+                  WeatherIcon(iconUrl: current.conditionIcon, size: 64),
                 ],
               ),
               const SizedBox(height: 16),
@@ -115,14 +110,8 @@ class CurrentWeatherWidget extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: Colors.blue.shade300),
         const SizedBox(width: 4),
-        Text(
-          '$label: ',
-          style: TextStyle(color: Colors.blue.shade200),
-        ),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        Text('$label: ', style: TextStyle(color: Colors.blue.shade200)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
     );
   }

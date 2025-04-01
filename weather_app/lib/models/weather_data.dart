@@ -1,3 +1,6 @@
+import 'package:weather_app/services/location_services.dart';
+import 'package:flutter/material.dart';
+
 class WeatherData {
   final Location location;
   final CurrentWeather current;
@@ -15,13 +18,36 @@ class WeatherData {
     return WeatherData(
       location: Location.fromJson(json['location']),
       current: CurrentWeather.fromJson(json['current']),
-      hourly: (json['forecast']['forecastday'][0]['hour'] as List)
-          .map((e) => HourlyForecast.fromJson(e))
-          .toList(),
-      daily: (json['forecast']['forecastday'] as List)
-          .map((e) => DailyForecast.fromJson(e))
-          .toList(),
+      hourly:
+          (json['forecast']['forecastday'][0]['hour'] as List)
+              .map((e) => HourlyForecast.fromJson(e))
+              .toList(),
+      daily:
+          (json['forecast']['forecastday'] as List)
+              .map((e) => DailyForecast.fromJson(e))
+              .toList(),
     );
+  }
+
+  static Future<String> getCurrentLocationName() async {
+    final locationService = LocationService();
+    try {
+      final coordinates = await locationService.getCurrentLocation();
+      final double latitude = coordinates['latitude'] ?? 0.0;
+      final double longitude = coordinates['longitude'] ?? 0.0;
+
+      if (latitude == 0.0 && longitude == 0.0) {
+        throw Exception('Invalid coordinates received.');
+      }
+
+      final locationName = await locationService.getLocationName(
+        latitude,
+        longitude,
+      );
+      return locationName;
+    } catch (e) {
+      return 'Error: $e';
+    }
   }
 }
 
@@ -55,16 +81,10 @@ class WeatherCondition {
   final String text;
   final String icon;
 
-  WeatherCondition({
-    required this.text,
-    required this.icon,
-  });
+  WeatherCondition({required this.text, required this.icon});
 
   factory WeatherCondition.fromJson(Map<String, dynamic> json) {
-    return WeatherCondition(
-      text: json['text'],
-      icon: json['icon'],
-    );
+    return WeatherCondition(text: json['text'], icon: json['icon']);
   }
 }
 
@@ -124,10 +144,7 @@ class DailyForecast {
   final DateTime date;
   final DailyDay day;
 
-  DailyForecast({
-    required this.date,
-    required this.day,
-  });
+  DailyForecast({required this.date, required this.day});
 
   String get conditionIcon => day.condition.icon;
   double get maxTempC => day.maxtempC;

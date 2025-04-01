@@ -2,6 +2,92 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/weather_data.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:weather_app/models/weather_data.dart';
+
+class WeatherScreen extends StatefulWidget {
+  @override
+  _WeatherScreenState createState() => _WeatherScreenState();
+}
+
+class _WeatherScreenState extends State<WeatherScreen> {
+  String? locationName;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLocationName();
+  }
+
+  Future<void> _fetchLocationName() async {
+    try {
+      final name = await WeatherData.getCurrentLocationName();
+      setState(() {
+        locationName = name;
+      });
+    } catch (e) {
+      setState(() {
+        locationName = 'Error al obtener la ubicación';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Weather App')),
+      body:
+          locationName == null
+              ? Center(child: CircularProgressIndicator())
+              : HomeScreen(
+                weatherData: WeatherData(
+                  location: Location(
+                    name: 'Ubicación desconocida',
+                    region: 'Región desconocida',
+                    country: 'País desconocido',
+                    lat: 0.0,
+                    lon: 0.0,
+                  ),
+                  current: CurrentWeather(
+                    tempC: 20.0,
+                    feelslikeC: 20.0,
+                    condition: WeatherCondition(
+                      text: 'Despejado',
+                      icon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
+                    ),
+                    windKph: 10.0,
+                    humidity: 50,
+                    uv: 5.0,
+                  ),
+                  hourly: [
+                    HourlyForecast(
+                      time: DateTime.now(),
+                      tempC: 20.0,
+                      condition: WeatherCondition(
+                        text: 'Despejado',
+                        icon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
+                      ),
+                    ),
+                  ],
+                  daily: [
+                    DailyForecast(
+                      date: DateTime.now(),
+                      day: DailyDay(
+                        maxtempC: 25.0,
+                        mintempC: 15.0,
+                        condition: WeatherCondition(
+                          text: 'Despejado',
+                          icon:
+                              '//cdn.weatherapi.com/weather/64x64/day/113.png',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                location: locationName!,
+              ),
+    );
+  }
+}
 
 class HomeScreen extends StatelessWidget {
   final WeatherData weatherData;
@@ -11,6 +97,9 @@ class HomeScreen extends StatelessWidget {
     super.key,
     required this.weatherData,
     required this.location,
+    String? locationName,
+    String? locationRegion,
+    String? locationCountry,
   });
 
   @override
@@ -26,15 +115,15 @@ class HomeScreen extends StatelessWidget {
           // Encabezado con ubicación
           _buildLocationHeader(),
           const SizedBox(height: 24),
-          
+
           // Tarjeta del clima actual
           _buildCurrentWeatherCard(current),
           const SizedBox(height: 24),
-          
+
           // Pronóstico por horas
           _buildHourlyForecast(weatherData.hourly),
           const SizedBox(height: 24),
-          
+
           // Pronóstico diario
           _buildDailyForecast(weatherData.daily),
         ],
@@ -48,17 +137,11 @@ class HomeScreen extends StatelessWidget {
       children: [
         Text(
           location,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         Text(
           DateFormat('EEEE, d MMMM').format(DateTime.now()),
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.blue.shade200,
-          ),
+          style: TextStyle(fontSize: 16, color: Colors.blue.shade200),
         ),
       ],
     );
@@ -93,7 +176,8 @@ class HomeScreen extends StatelessWidget {
                   imageUrl: 'https:${current.condition.icon}',
                   width: 80,
                   height: 80,
-                  placeholder: (context, url) => const CircularProgressIndicator(),
+                  placeholder:
+                      (context, url) => const CircularProgressIndicator(),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ],
@@ -129,7 +213,11 @@ class HomeScreen extends StatelessWidget {
       children: [
         const Text(
           'Próximas horas',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -175,42 +263,48 @@ class HomeScreen extends StatelessWidget {
       children: [
         const Text(
           'Próximos días',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         const SizedBox(height: 8),
-        ...daily.map((day) => Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Text(DateFormat('EEEE').format(day.date)),
-                ),
-                Expanded(
-                  child: CachedNetworkImage(
-                    imageUrl: 'https:${day.day.condition.icon}',
-                    width: 40,
-                    height: 40,
+        ...daily.map(
+          (day) => Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(DateFormat('EEEE').format(day.date)),
                   ),
-                ),
-                Expanded(
-                  child: Text(
-                    '${day.day.maxtempC.round()}°',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: CachedNetworkImage(
+                      imageUrl: 'https:${day.day.condition.icon}',
+                      width: 40,
+                      height: 40,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Text(
-                    '${day.day.mintempC.round()}°',
-                    style: TextStyle(color: Colors.blue.shade300),
+                  Expanded(
+                    child: Text(
+                      '${day.day.maxtempC.round()}°',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: Text(
+                      '${day.day.mintempC.round()}°',
+                      style: TextStyle(color: Colors.blue.shade300),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        )),
+        ),
       ],
     );
   }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:weather_app/screens/cityScreen.dart';
 import '../models/weather_data.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:weather_app/models/weather_data.dart';
+import 'package:weather_app/screens/cityScreen.dart';
 
 class WeatherScreen extends StatefulWidget {
   @override
@@ -41,7 +43,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
               : HomeScreen(
                 weatherData: WeatherData(
                   location: Location(
-                    name: 'Ubicación desconocida',
+                    name: locationName!, // Pasa el nombre de la ubicación aquí
                     region: 'Región desconocida',
                     country: 'País desconocido',
                     lat: 0.0,
@@ -58,30 +60,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     humidity: 50,
                     uv: 5.0,
                   ),
-                  hourly: [
-                    HourlyForecast(
-                      time: DateTime.now(),
-                      tempC: 20.0,
-                      condition: WeatherCondition(
-                        text: 'Despejado',
-                        icon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
-                      ),
-                    ),
-                  ],
-                  daily: [
-                    DailyForecast(
-                      date: DateTime.now(),
-                      day: DailyDay(
-                        maxtempC: 25.0,
-                        mintempC: 15.0,
-                        condition: WeatherCondition(
-                          text: 'Despejado',
-                          icon:
-                              '//cdn.weatherapi.com/weather/64x64/day/113.png',
-                        ),
-                      ),
-                    ),
-                  ],
+                  hourly: [],
+                  daily: [],
                 ),
                 location: locationName!,
               ),
@@ -104,29 +84,26 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final current = weatherData.current;
-    final today = weatherData.daily[0];
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Encabezado con ubicación
-          _buildLocationHeader(),
-          const SizedBox(height: 24),
-
-          // Tarjeta del clima actual
-          _buildCurrentWeatherCard(current),
-          const SizedBox(height: 24),
-
-          // Pronóstico por horas
-          _buildHourlyForecast(weatherData.hourly),
-          const SizedBox(height: 24),
-
-          // Pronóstico diario
-          _buildDailyForecast(weatherData.daily),
-        ],
+    return Scaffold(
+      body: Container(
+        decoration: buildGradientBackground(),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildLocationHeader(),
+              const SizedBox(height: 24),
+              _buildCurrentWeatherCard(context, weatherData.current),
+              const SizedBox(height: 24),
+              if (weatherData.hourly.isNotEmpty)
+                _buildHourlyForecast(weatherData.hourly),
+              const SizedBox(height: 24),
+              if (weatherData.daily.isNotEmpty)
+                _buildDailyForecast(weatherData.daily),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -136,7 +113,7 @@ class HomeScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          location,
+          location, // Aquí se mostrará el nombre de la ubicación
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         Text(
@@ -147,51 +124,75 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCurrentWeatherCard(CurrentWeather current) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${current.tempC.round()}°',
-                      style: const TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w300,
+  Widget _buildCurrentWeatherCard(
+    BuildContext context,
+    CurrentWeather current,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => CityScreen(
+                  cityName: location,
+                  weatherCondition: current.condition.text,
+                  temperature: current.tempC.round(),
+                  feelsLike: current.feelslikeC.round(),
+                  highTemp: 25, // Reemplaza con datos reales
+                  lowTemp: 15, // Reemplaza con datos reales
+                  hourlyForecast: [], // Reemplaza con datos reales
+                  dailyForecast: [], // Reemplaza con datos reales
+                ),
+          ),
+        );
+      },
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${current.tempC.round()}°',
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w300,
+                        ),
                       ),
-                    ),
-                    Text(
-                      current.condition.text,
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
-                CachedNetworkImage(
-                  imageUrl: 'https:${current.condition.icon}',
-                  width: 80,
-                  height: 80,
-                  placeholder:
-                      (context, url) => const CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildWeatherDetail(Icons.water_drop, '${current.humidity}%'),
-                _buildWeatherDetail(Icons.air, '${current.windKph} km/h'),
-                _buildWeatherDetail(Icons.wb_sunny, '${current.uv}'),
-              ],
-            ),
-          ],
+                      Text(
+                        current.condition.text,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                  CachedNetworkImage(
+                    imageUrl: 'https:${current.condition.icon}',
+                    width: 80,
+                    height: 80,
+                    placeholder:
+                        (context, url) => const CircularProgressIndicator(),
+                    errorWidget:
+                        (context, url, error) => const Icon(Icons.error),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildWeatherDetail(Icons.water_drop, '${current.humidity}%'),
+                  _buildWeatherDetail(Icons.air, '${current.windKph} km/h'),
+                  _buildWeatherDetail(Icons.wb_sunny, '${current.uv}'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -28,29 +28,41 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Clima Simple',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color.fromARGB(
-          200,
-          12,
-          53,
-          163,
-        ).withOpacity(0.5),
-        colorScheme: ColorScheme.dark(
-          primary: const Color.fromARGB(255, 9, 11, 12),
-          secondary: const Color.fromARGB(255, 0, 0, 0),
-        ),
-        cardTheme: CardTheme(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return Container(
+      child: MaterialApp(
+        title: 'Clima Simple',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.dark().copyWith(
+          colorScheme: ColorScheme.dark(
+            primary: Color.fromARGB(255, 10, 76, 143),
+            secondary: Color.fromARGB(255, 45, 44, 46),
           ),
-          color: const Color(0xFF1D1E33),
+          cardTheme: CardTheme(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            color: const Color(0xFF1D1E33),
+          ),
+        ),
+        home: const WeatherPage(),
+      ),
+    );
+  }
+}
+
+class WeatherPage extends StatelessWidget {
+  const WeatherPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: buildGradientBackground(),
+        child: Center(
+          child: Text('Weather Page', style: TextStyle(color: Colors.white)),
         ),
       ),
-      home: const WeatherPage(),
     );
   }
 }

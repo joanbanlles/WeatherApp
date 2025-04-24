@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:weather_app/screens/cityScreen.dart';
 import '../models/weather_data.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:weather_app/models/weather_data.dart';
@@ -117,7 +118,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Tarjeta del clima actual
-          _buildCurrentWeatherCard(current),
+          _buildCurrentWeatherCard(context, weatherData.current),
           const SizedBox(height: 24),
 
           // Pronóstico por horas
@@ -147,51 +148,75 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCurrentWeatherCard(CurrentWeather current) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${current.tempC.round()}°',
-                      style: const TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w300,
+  Widget _buildCurrentWeatherCard(
+    BuildContext context,
+    CurrentWeather current,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => CityScreen(
+                  cityName: location,
+                  weatherCondition: current.condition.text,
+                  temperature: current.tempC.round(),
+                  feelsLike: current.feelslikeC.round(),
+                  highTemp: 25,
+                  lowTemp: 15,
+                  hourlyForecast: [],
+                  dailyForecast: [],
+                ),
+          ),
+        );
+      },
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${current.tempC.round()}°',
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w300,
+                        ),
                       ),
-                    ),
-                    Text(
-                      current.condition.text,
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
-                CachedNetworkImage(
-                  imageUrl: 'https:${current.condition.icon}',
-                  width: 80,
-                  height: 80,
-                  placeholder:
-                      (context, url) => const CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildWeatherDetail(Icons.water_drop, '${current.humidity}%'),
-                _buildWeatherDetail(Icons.air, '${current.windKph} km/h'),
-                _buildWeatherDetail(Icons.wb_sunny, '${current.uv}'),
-              ],
-            ),
-          ],
+                      Text(
+                        current.condition.text,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                  CachedNetworkImage(
+                    imageUrl: 'https:${current.condition.icon}',
+                    width: 80,
+                    height: 80,
+                    placeholder:
+                        (context, url) => const CircularProgressIndicator(),
+                    errorWidget:
+                        (context, url, error) => const Icon(Icons.error),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildWeatherDetail(Icons.water_drop, '${current.humidity}%'),
+                  _buildWeatherDetail(Icons.air, '${current.windKph} km/h'),
+                  _buildWeatherDetail(Icons.wb_sunny, '${current.uv}'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -216,7 +241,7 @@ class HomeScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Color.fromARGB(255, 255, 255, 255),
           ),
         ),
         const SizedBox(height: 8),
@@ -266,7 +291,7 @@ class HomeScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Color.fromARGB(255, 255, 255, 255),
           ),
         ),
         const SizedBox(height: 8),

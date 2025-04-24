@@ -156,6 +156,8 @@ class _WeatherPageState extends State<WeatherPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Clima Simple'),
+        backgroundColor: Colors.transparent, // Fondo transparente
+        elevation: 0, // Elimina la sombra del AppBar
         actions: [
           IconButton(
             icon: const Icon(Icons.search),

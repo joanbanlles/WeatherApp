@@ -44,6 +44,7 @@ class WeatherData {
         latitude,
         longitude,
       );
+      print('Location name: $locationName');
       return locationName;
     } catch (e) {
       return 'Error: $e';

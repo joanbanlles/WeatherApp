@@ -7,7 +7,7 @@ import 'screens/home_screen.dart';
 import 'services/weather_services.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Añade esta línea
+  WidgetsFlutterBinding.ensureInitialized();
 
   try {
     await dotenv.load(fileName: ".env");
@@ -32,25 +32,39 @@ class MyApp extends StatelessWidget {
       title: 'Clima Simple',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color.fromARGB(
-          200,
-          12,
-          53,
-          163,
-        ).withOpacity(0.5),
+        scaffoldBackgroundColor: Colors.transparent, // Cambiado a transparente
         colorScheme: ColorScheme.dark(
-          primary: const Color.fromARGB(255, 9, 11, 12),
-          secondary: const Color.fromARGB(255, 0, 0, 0),
+          primary: const Color.fromARGB(
+            255,
+            255,
+            255,
+            255,
+          ), // color lletres buscar ciudad
+          secondary: const Color.fromARGB(255, 255, 255, 255),
         ),
         cardTheme: CardTheme(
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          color: const Color(0xFF1D1E33),
+          color: const Color.fromARGB(174, 55, 49, 87),
         ),
       ),
-      home: const WeatherPage(),
+      home: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.fromARGB(255, 56, 111, 167),
+                Color.fromARGB(255, 116, 114, 117),
+              ],
+            ),
+          ),
+          child: const WeatherPage(),
+        ),
+      ),
     );
   }
 }

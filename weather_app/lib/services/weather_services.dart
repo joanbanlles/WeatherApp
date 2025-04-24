@@ -7,7 +7,7 @@ class WeatherService {
   Future<WeatherData> fetchWeatherData(String query) async {
     final response = await http.get(
       Uri.parse(
-        'https://api.weatherapi.com/v1/forecast.json?key=2d0c32eecd0a4c148d8152442252703&q=$query&days=7&aqi=no&alerts=no',
+        'https://api.weatherapi.com/v1/forecast.json?key=43201f42c6be4d379c6133011252404&q=$query&days=7&aqi=no&alerts=no',
       ),
     );
 

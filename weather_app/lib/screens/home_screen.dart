@@ -309,4 +309,17 @@ class HomeScreen extends StatelessWidget {
       ],
     );
   }
+    BoxDecoration buildGradientBackground() {
+    return const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color.fromARGB(255, 10, 76, 143),
+          Color.fromARGB(255, 45, 44, 46),
+        ],
+      ),
+    );
+  }
+
 }

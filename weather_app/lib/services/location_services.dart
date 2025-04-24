@@ -33,7 +33,7 @@ class LocationService {
   }
 
   Future<String> getLocationName(double latitude, double longitude) async {
-    const apiKey = '2d0c32eecd0a4c148d8152442252703';
+    const apiKey = '43201f42c6be4d379c6133011252404';
     final url =
         'https://api.opencagedata.com/geocode/v1/json?q=$latitude+$longitude&key=$apiKey';
 

@@ -26,31 +26,36 @@ class _WeatherPageState extends State<WeatherPage> {
     _initializeApp();
   }
 
-  Future<void> _initializeApp() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
+Future<void> _initializeApp() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
 
-      // Obtén la ubicación guardada o la ubicación actual
-      String? savedLocation = prefs.getString('savedLocation');
-      if (savedLocation == null) {
+    String? savedLocation = prefs.getString('savedLocation');
+    if (savedLocation == null) {
+      try {
         Position position = await _getCurrentLocation();
         savedLocation = '${position.latitude},${position.longitude}';
+      } catch (e) {
+        debugPrint('No se pudo obtener la ubicación actual. Usando valor por defecto.');
+        savedLocation = 'Lleida';
       }
-
-      setState(() {
-        _currentLocation = savedLocation!;
-        _weatherData = _weatherService.fetchWeatherData(_currentLocation);
-        _isLoading = false;
-      });
-    } catch (e, stackTrace) {
-      debugPrint('Error inicializando: $e');
-      debugPrint('StackTrace: $stackTrace');
-      setState(() {
-        _error = 'Error inicializando: $e';
-        _isLoading = false;
-      });
     }
+
+    setState(() {
+      _currentLocation = savedLocation!;
+      _weatherData = _weatherService.fetchWeatherData(_currentLocation);
+      _isLoading = false;
+    });
+  } catch (e, stackTrace) {
+    debugPrint('Error inicializando: $e');
+    debugPrint('StackTrace: $stackTrace');
+    setState(() {
+      _error = 'Error inicializando: $e';
+      _isLoading = false;
+    });
   }
+}
+
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled;

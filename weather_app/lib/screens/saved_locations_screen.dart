@@ -213,9 +213,13 @@ class _SavedLocationsScreenState extends State<SavedLocationsScreen> {
                                   height: 30,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  '${weather.current.tempC.round()}°C  ${weather.current.condition.text}',
-                                  style: const TextStyle(color: Colors.white),
+                                Expanded(
+                                  child: Text(
+                                    '${weather.current.tempC.round()}°C  ${weather.current.condition.text}',
+                                    style: const TextStyle(color: Colors.white),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
                                 ),
                               ],
                             )

@@ -66,22 +66,7 @@ class _CurrentWeatherHeaderState extends State<CurrentWeatherHeader> {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CachedNetworkImage(
-                    imageUrl: 'https:${widget.current.condition.icon}',
-                    width: 50,
-                    height: 50,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    widget.current.condition.text,
-                    style: const TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ],
-              ),
+
             ],
           ),
         ),

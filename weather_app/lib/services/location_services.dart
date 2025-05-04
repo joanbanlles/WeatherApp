@@ -63,11 +63,27 @@ Future<List<String>> searchCitySuggestions(String query) async {
     final data = json.decode(response.body);
     final results = data['results'] as List<dynamic>;
 
-    return results.map<String>((item) => item['formatted'] as String).toList();
+    final suggestions = <String>{}; // Usamos un Set para evitar duplicados
+
+    for (final item in results) {
+      final components = item['components'] ?? {};
+      final name = components['city'] ??
+                   components['town'] ??
+                   components['village'] ??
+                   components['municipality'] ??
+                   components['county'] ??
+                   components['state'];
+      if (name != null) {
+        suggestions.add(name.toString());
+      }
+    }
+
+    return suggestions.toList();
   } else {
     throw Exception('Error al buscar sugerencias');
   }
 }
+
 
 
 

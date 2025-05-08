@@ -33,11 +33,16 @@ class LocationService {
   }
 
   Future<String> getLocationName(double latitude, double longitude) async {
+<<<<<<< HEAD
     const apiKey = '946bdb8c833d4ec8982f0ed9cf784244'; // Reemplaza con tu API Key de OpenCage
+=======
+    const apiKey = '43201f42c6be4d379c6133011252404';
+>>>>>>> main
     final url =
         'https://api.opencagedata.com/geocode/v1/json?q=$latitude+$longitude&key=$apiKey';
 
     final response = await http.get(Uri.parse(url));
+    print('Respuesta de la API: ${response.body}');
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return data['results'][0]['components']['city'] ??
@@ -52,6 +57,7 @@ class LocationService {
     }
   }
 
+<<<<<<< HEAD
 Future<List<String>> searchCitySuggestions(String query) async {
   const apiKey = '946bdb8c833d4ec8982f0ed9cf784244'; // tu API key
   final url =
@@ -88,4 +94,22 @@ Future<List<String>> searchCitySuggestions(String query) async {
 
 
 
+=======
+  static Future<String> getCurrentLocationName() async {
+    final locationService = LocationService();
+    try {
+      final coordinates = await locationService.getCurrentLocation();
+      print('Coordenadas obtenidas: $coordinates'); // Depuración
+      final locationName = await locationService.getLocationName(
+        coordinates['latitude']!,
+        coordinates['longitude']!,
+      );
+      print('Nombre de la ubicación: $locationName'); // Depuración
+      return locationName;
+    } catch (e) {
+      print('Error: $e'); // Depuración
+      return 'Error al obtener la ubicación';
+    }
+  }
+>>>>>>> main
 }

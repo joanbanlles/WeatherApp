@@ -40,41 +40,57 @@ class DailyForecastWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDailyItem(DailyForecast day) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+Widget _buildDailyItem(DailyForecast day) {
+  final today = DateTime.now();
+  final isToday = day.date.day == today.day &&
+                  day.date.month == today.month &&
+                  day.date.year == today.year;
+
+  return Container(
+    decoration: BoxDecoration(
+      color: isToday ? Colors.blue.shade700.withOpacity(0.4) : Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      border: isToday
+          ? Border.all(color: Colors.white70, width: 1.2)
+          : null,
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             flex: 2,
             child: Text(
-              DateFormat('EEEE').format(day.date),
-              style: const TextStyle(fontSize: 16),
+              DateFormat('EEEE', 'es_ES').format(day.date),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                color: Colors.white,
+              ),
             ),
           ),
           Expanded(
-            child: WeatherIcon(
-              iconUrl: day.conditionIcon, // Usamos el getter
-              size: 32,
-            ),
+            child: WeatherIcon(iconUrl: day.conditionIcon, size: 32),
           ),
           Expanded(
             child: Text(
-              '${day.maxTempC.round()}°', // Usamos el getter
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              '${day.maxTempC.round()}°',
               textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
           Expanded(
             child: Text(
-              '${day.minTempC.round()}°', // Usamos el getter
+              '${day.minTempC.round()}°',
+              textAlign: TextAlign.center,
               style: TextStyle(color: Colors.blue.shade300),
-              textAlign: TextAlign.center,
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 }

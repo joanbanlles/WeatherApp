@@ -33,7 +33,8 @@ class LocationService {
   }
 
   Future<String> getLocationName(double latitude, double longitude) async {
-    const apiKey = '43201f42c6be4d379c6133011252404';
+    const apiKey =
+        '946bdb8c833d4ec8982f0ed9cf784244'; // Reemplaza con tu API Key de OpenCage
     final url =
         'https://api.opencagedata.com/geocode/v1/json?q=$latitude+$longitude&key=$apiKey';
 
@@ -41,26 +42,48 @@ class LocationService {
     print('Respuesta de la API: ${response.body}');
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data['results'][0]['formatted']; // Devuelve el nombre de la ubicación
+      return data['results'][0]['components']['city'] ??
+          data['results'][0]['components']['town'] ??
+          data['results'][0]['components']['village'] ??
+          data['results'][0]['components']['municipality'] ??
+          data['results'][0]['components']['county'] ??
+          data['results'][0]['components']['state'] ??
+          'Ubicación desconocida';
     } else {
       throw Exception('Error al obtener el nombre de la ubicación.');
     }
   }
 
-  static Future<String> getCurrentLocationName() async {
-    final locationService = LocationService();
-    try {
-      final coordinates = await locationService.getCurrentLocation();
-      print('Coordenadas obtenidas: $coordinates'); // Depuración
-      final locationName = await locationService.getLocationName(
-        coordinates['latitude']!,
-        coordinates['longitude']!,
-      );
-      print('Nombre de la ubicación: $locationName'); // Depuración
-      return locationName;
-    } catch (e) {
-      print('Error: $e'); // Depuración
-      return 'Error al obtener la ubicación';
+  Future<List<String>> searchCitySuggestions(String query) async {
+    const apiKey = '946bdb8c833d4ec8982f0ed9cf784244'; // tu API key
+    final url =
+        'https://api.opencagedata.com/geocode/v1/json?q=$query&key=$apiKey&limit=5&language=es';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = data['results'] as List<dynamic>;
+
+      final suggestions = <String>{}; // Usamos un Set para evitar duplicados
+
+      for (final item in results) {
+        final components = item['components'] ?? {};
+        final name =
+            components['city'] ??
+            components['town'] ??
+            components['village'] ??
+            components['municipality'] ??
+            components['county'] ??
+            components['state'];
+        if (name != null) {
+          suggestions.add(name.toString());
+        }
+      }
+
+      return suggestions.toList();
+    } else {
+      throw Exception('Error al buscar sugerencias');
     }
   }
 }

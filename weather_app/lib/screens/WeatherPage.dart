@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:weather_app/models/weather_data.dart';
 import 'package:weather_app/screens/home_screen.dart';
+import 'package:weather_app/services/location_services.dart';
 import 'package:weather_app/services/weather_services.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:weather_app/widgets/city_search_delegate.dart';
+import 'saved_locations_screen.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -15,10 +17,14 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage> {
   final WeatherService _weatherService = WeatherService();
-  late Future<WeatherData> _weatherData;
-  String _currentLocation = 'Lleida';
+  final LocationService _locationService = LocationService();
+
+  Future<WeatherData>? _weatherData;
+  String _currentLocation = '';
+  String _locationName = '';
   bool _isLoading = true;
   String? _error;
+  bool _useFahrenheit = false;
 
   @override
   void initState() {
@@ -26,19 +32,34 @@ class _WeatherPageState extends State<WeatherPage> {
     _initializeApp();
   }
 
-Future<void> _initializeApp() async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> _initializeApp() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _useFahrenheit = prefs.getBool('useFahrenheit') ?? false;
+      String? savedLocation = prefs.getString('savedLocation');
 
-    String? savedLocation = prefs.getString('savedLocation');
-    if (savedLocation == null) {
-      try {
+      if (savedLocation == null) {
         Position position = await _getCurrentLocation();
         savedLocation = '${position.latitude},${position.longitude}';
-      } catch (e) {
-        debugPrint('No se pudo obtener la ubicación actual. Usando valor por defecto.');
-        savedLocation = 'Lleida';
+        await prefs.setString('savedLocation', savedLocation);
       }
+
+      final parts = savedLocation.split(',');
+      final lat = double.tryParse(parts[0]) ?? 0.0;
+      final lon = double.tryParse(parts[1]) ?? 0.0;
+      final name = await _locationService.getLocationName(lat, lon);
+
+      setState(() {
+        _currentLocation = savedLocation!;
+        _locationName = name;
+        _weatherData = _weatherService.fetchWeatherData(savedLocation);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error al iniciar la app: $e';
+        _isLoading = false;
+      });
     }
 
     setState(() {
@@ -58,34 +79,18 @@ Future<void> _initializeApp() async {
 
 
   Future<Position> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) throw Exception('Ubicación deshabilitada');
 
-    // Verifica si el servicio de ubicación está habilitado
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw Exception(
-        'El servicio de ubicación está deshabilitado. Por favor, habilítalo.',
-      );
-    }
-
-    // Verifica los permisos de ubicación
-    permission = await Geolocator.checkPermission();
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw Exception('Los permisos de ubicación fueron denegados.');
-      }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception(
-        'Los permisos de ubicación están permanentemente denegados. '
-        'Por favor, habilítalos en la configuración del dispositivo.',
-      );
+      throw Exception('Permiso permanente denegado');
     }
 
-    // Obtén la ubicación actual
     return await Geolocator.getCurrentPosition();
   }
 
@@ -94,132 +99,141 @@ Future<void> _initializeApp() async {
     await prefs.setString('savedLocation', location);
   }
 
-  void _showSearchDialog(BuildContext context) {
-    final controller = TextEditingController();
+  Future<void> _toggleTempUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('useFahrenheit', !_useFahrenheit);
+    setState(() {
+      _useFahrenheit = !_useFahrenheit;
+    });
+  }
 
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Buscar ciudad'),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(hintText: 'Ej: Barcelona, ES'),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  if (controller.text.isNotEmpty) {
-                    Navigator.pop(context);
-                    await _saveLocation(controller.text);
-                    if (mounted) {
-                      setState(() {
-                        _currentLocation = controller.text;
-                        _weatherData = _weatherService.fetchWeatherData(
-                          _currentLocation,
-                        );
-                      });
-                    }
-                  }
-                },
-                child: const Text('Buscar'),
-              ),
-            ],
-          ),
+  void _navigateToSavedLocations() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SavedLocationsScreen(
+          onCitySelected: (city) async {
+            await _saveLocation(city);
+            final parts = city.split(',');
+            final lat = double.tryParse(parts[0]) ?? 0.0;
+            final lon = double.tryParse(parts[1]) ?? 0.0;
+            final name = await _locationService.getLocationName(lat, lon);
+
+            setState(() {
+              _currentLocation = city;
+              _locationName = name;
+              _weatherData = _weatherService.fetchWeatherData(city);
+            });
+          },
+        ),
+      ),
     );
+  }
+
+  void _openSearch() async {
+    final selected = await showSearch<String>(
+      context: context,
+      delegate: CitySearchDelegate(locationService: _locationService),
+    );
+
+    if (selected != null && selected.isNotEmpty) {
+      try {
+        final weather = await _weatherService.fetchWeatherData(selected);
+        final lat = weather.location.lat;
+        final lon = weather.location.lon;
+        final coordinate = '$lat,$lon';
+
+        await _saveLocation(coordinate);
+        final name = await _locationService.getLocationName(lat, lon);
+
+        setState(() {
+          _currentLocation = coordinate;
+          _locationName = name;
+          _weatherData = _weatherService.fetchWeatherData(coordinate);
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al buscar ciudad: $e')),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (_error != null) {
       return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 50, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(_error!),
-              TextButton(
-                onPressed: _initializeApp,
-                child: const Text('Reintentar'),
-              ),
-            ],
-          ),
-        ),
+        body: Center(child: Text(_error ?? 'Error')),
       );
     }
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Clima Simple'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: _navigateToSavedLocations,
+          ),
+          IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () => _showSearchDialog(context),
+            onPressed: _openSearch,
           ),
           IconButton(
             icon: const Icon(Icons.location_on),
             onPressed: () async {
               try {
-                Position position = await _getCurrentLocation();
-                String currentLocation =
-                    '${position.latitude},${position.longitude}';
-
-                await _saveLocation(currentLocation);
+                Position pos = await _getCurrentLocation();
+                final loc = '${pos.latitude},${pos.longitude}';
+                final name = await _locationService.getLocationName(pos.latitude, pos.longitude);
+                await _saveLocation(loc);
                 setState(() {
-                  _currentLocation = currentLocation;
-                  _weatherData = _weatherService.fetchWeatherData(
-                    _currentLocation,
-                  );
+                  _currentLocation = loc;
+                  _locationName = name;
+                  _weatherData = _weatherService.fetchWeatherData(loc);
                 });
               } catch (e) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: $e')),
+                );
               }
             },
           ),
+          IconButton(
+            icon: Text(_useFahrenheit ? '°F' : '°C', style: const TextStyle(fontSize: 16)),
+            onPressed: _toggleTempUnit,
+          ),
         ],
       ),
-      body: FutureBuilder<WeatherData>(
-        future: _weatherData,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 50, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Error: ${snapshot.error}'),
-                  TextButton(
-                    onPressed: _initializeApp,
-                    child: const Text('Reintentar'),
-                  ),
-                ],
-              ),
-            );
-          } else if (snapshot.hasData) {
-            return HomeScreen(
-              weatherData: snapshot.data!,
-              location: _currentLocation,
-            );
-          } else {
-            return const Center(child: Text('No hay datos disponibles'));
-          }
-        },
-      ),
+      body: _weatherData == null
+          ? const Center(child: CircularProgressIndicator())
+          : FutureBuilder<WeatherData>(
+              future: _weatherData!,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (snapshot.hasData) {
+                  return HomeScreen(
+                    weatherData: snapshot.data!,
+                    location: _locationName,
+                    useFahrenheit: _useFahrenheit,
+                  );
+                } else {
+                  return const Center(child: Text('Sin datos'));
+                }
+              },
+            ),
     );
   }
 }

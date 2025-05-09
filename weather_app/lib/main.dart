@@ -1,26 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:weather_app/models/weather_data.dart';
-import 'package:weather_app/screens/WeatherPage.dart';
-import 'screens/home_screen.dart';
-import 'services/weather_services.dart';
+import 'screens/WeatherPage.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Añade esta línea
+  WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await dotenv.load(fileName: ".env");
-    runApp(const MyApp());
-  } catch (e) {
-    runApp(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(child: Text('Error cargando configuración: $e')),
-        ),
-      ),
-    );
-  }
+  await initializeDateFormatting('es_ES', null); // << NECESARIO
+  await dotenv.load(fileName: ".env");
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -28,22 +17,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: MaterialApp(
-        title: 'Clima Simple',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark().copyWith(
-          colorScheme: ColorScheme.dark(
-            primary: Color.fromARGB(255, 10, 76, 143),
-            secondary: Color.fromARGB(255, 45, 44, 46),
+    return MaterialApp(
+      title: 'Clima Simple',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0A0E21),
+        fontFamily: 'Roboto',
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF1E88E5),
+          secondary: Color(0xFF42A5F5),
+        ),
+        cardTheme: CardTheme(
+          color: const Color(0xFF1D1E33),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          cardTheme: CardTheme(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            color: const Color(0xFF1D1E33),
-          ),
+          elevation: 6,
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
         ),
         home: const WeatherPage(),
       ),
@@ -66,7 +58,7 @@ class WeatherPage extends StatelessWidget {
     );
   }
 
-    BoxDecoration buildGradientBackground() {
+  BoxDecoration buildGradientBackground() {
     return const BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
@@ -78,5 +70,4 @@ class WeatherPage extends StatelessWidget {
       ),
     );
   }
-
 }

@@ -1,4 +1,3 @@
-// widgets/hourly_forecast.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/weather_data.dart';

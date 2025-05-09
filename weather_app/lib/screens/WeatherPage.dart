@@ -61,22 +61,7 @@ class _WeatherPageState extends State<WeatherPage> {
         _isLoading = false;
       });
     }
-
-    setState(() {
-      _currentLocation = savedLocation!;
-      _weatherData = _weatherService.fetchWeatherData(_currentLocation);
-      _isLoading = false;
-    });
-  } catch (e, stackTrace) {
-    debugPrint('Error inicializando: $e');
-    debugPrint('StackTrace: $stackTrace');
-    setState(() {
-      _error = 'Error inicializando: $e';
-      _isLoading = false;
-    });
   }
-}
-
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();

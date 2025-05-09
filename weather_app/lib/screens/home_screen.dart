@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:weather_app/models/weather_data.dart';
-import 'package:weather_app/screens/cityScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   final WeatherData weatherData;
@@ -43,9 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final itemWidth = 80.0 + 8.0;
       final screenWidth = MediaQuery.of(context).size.width;
       final offset = (index * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
-      _hourScrollController.jumpTo(
-        offset.clamp(0, _hourScrollController.position.maxScrollExtent),
-      );
+      _hourScrollController.jumpTo(offset.clamp(0, _hourScrollController.position.maxScrollExtent));
     }
   }
 
@@ -109,118 +106,96 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCurrentWeatherCard(CurrentWeather current) {
-    String _getImageAssetFromCondition(String condition) {
-      final lower = condition.toLowerCase();
-      if (lower.contains('rain')) return 'assets/images/rainy.jpg';
-      if (lower.contains('cloud')) return 'assets/images/cloudy.jpg';
-      if (lower.contains('clear') || lower.contains('sun'))
-        return 'assets/images/sunny.jpg';
-      if (lower.contains('snow')) return 'assets/images/snow.jpg';
-      return 'assets/images/default.jpg';
-    }
+Widget _buildCurrentWeatherCard(CurrentWeather current) {
+  String _getImageAssetFromCondition(String condition) {
+    final lower = condition.toLowerCase();
+    if (lower.contains('rain')) return 'assets/images/rainy.jpg';
+    if (lower.contains('cloud')) return 'assets/images/cloudy.jpg';
+    if (lower.contains('clear') || lower.contains('sun')) return 'assets/images/sunny.jpg';
+    if (lower.contains('snow')) return 'assets/images/snow.jpg';
+    return 'assets/images/default.jpg';
+  }
 
-    final imageAsset = _getImageAssetFromCondition(current.condition.text);
+  final imageAsset = _getImageAssetFromCondition(current.condition.text);
 
-    return Column(
-      children: [
-        Container(
-          height: 180,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            image: DecorationImage(
-              image: AssetImage(imageAsset),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.black.withOpacity(0.4),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _temp(current.tempC),
-                    style: const TextStyle(
-                      fontSize: 60,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CachedNetworkImage(
-                        imageUrl: 'https:${current.condition.icon}',
-                        width: 50,
-                        height: 50,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        current.condition.text,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+  return Column(
+    children: [
+      Container(
+        height: 180,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          image: DecorationImage(
+            image: AssetImage(imageAsset),
+            fit: BoxFit.cover,
           ),
         ),
-        const SizedBox(height: 16),
-        Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.black.withOpacity(0.4),
           ),
-          margin: const EdgeInsets.symmetric(vertical: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildWeatherDetail(
-                  Icons.water_drop,
-                  'Humedad',
-                  '${current.humidity}%',
+                Text(
+                  _temp(current.tempC),
+                  style: const TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-                _buildWeatherDetail(
-                  Icons.air,
-                  'Viento',
-                  '${current.windKph.toStringAsFixed(1)} km/h',
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: 'https:${current.condition.icon}',
+                      width: 50,
+                      height: 50,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      current.condition.text,
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ],
                 ),
-                _buildWeatherDetail(Icons.wb_sunny, 'UV', '${current.uv}'),
               ],
             ),
           ),
         ),
-      ],
-    );
-  }
+      ),
+      const SizedBox(height: 16),
+      Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildWeatherDetail(Icons.water_drop, 'Humedad', '${current.humidity}%'),
+              _buildWeatherDetail(Icons.air, 'Viento', '${current.windKph.toStringAsFixed(1)} km/h'),
+              _buildWeatherDetail(Icons.wb_sunny, 'UV', '${current.uv}'),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 
   Widget _buildWeatherDetail(IconData icon, String label, String value) {
     return Column(
       children: [
         Icon(icon, size: 24, color: Colors.blue.shade300),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.white70),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.white70)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
       ],
     );
   }
@@ -250,24 +225,22 @@ class _HomeScreenState extends State<HomeScreen> {
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final hour = hourly[index];
-              final isNow =
-                  hour.time.hour == now.hour && hour.time.day == now.day;
+              final isNow = hour.time.hour == now.hour && hour.time.day == now.day;
 
               return Container(
                 width: 80,
                 decoration: BoxDecoration(
                   color: isNow ? Colors.white : const Color(0xFF1D1E33),
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow:
-                      isNow
-                          ? [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
-                            ),
-                          ]
-                          : [],
+                  boxShadow: isNow
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : [],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(8),
@@ -347,10 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: Text(
                       _temp(day.day.maxtempC),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -367,19 +337,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  BoxDecoration buildGradientBackground() {
-    return const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color.fromARGB(255, 10, 76, 143),
-          Color.fromARGB(255, 45, 44, 46),
-        ],
-      ),
     );
   }
 }

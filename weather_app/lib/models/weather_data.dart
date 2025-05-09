@@ -32,19 +32,21 @@ class WeatherData {
   static Future<String> getCurrentLocationName() async {
     final locationService = LocationService();
     try {
-      // Obtén las coordenadas actuales
       final coordinates = await locationService.getCurrentLocation();
-      final double latitude = coordinates['latitude']!;
-      final double longitude = coordinates['longitude']!;
+      final double latitude = coordinates['latitude'] ?? 0.0;
+      final double longitude = coordinates['longitude'] ?? 0.0;
 
-      // Llama al método para obtener el nombre de la ubicación
+      if (latitude == 0.0 && longitude == 0.0) {
+        throw Exception('Invalid coordinates received.');
+      }
+
       final locationName = await locationService.getLocationName(
         latitude,
         longitude,
       );
       return locationName;
     } catch (e) {
-      return 'Error al obtener la ubicación';
+      return 'Error: $e';
     }
   }
 }

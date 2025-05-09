@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/WeatherPage.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -11,6 +12,7 @@ Future<void> main() async {
 
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -37,37 +39,8 @@ class MyApp extends StatelessWidget {
           elevation: 6,
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
         ),
-        home: const WeatherPage(),
       ),
-    );
-  }
-}
-
-class WeatherPage extends StatelessWidget {
-  const WeatherPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: buildGradientBackground(),
-        child: Center(
-          child: Text('Weather Page', style: TextStyle(color: Colors.white)),
-        ),
-      ),
-    );
-  }
-
-  BoxDecoration buildGradientBackground() {
-    return const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color.fromARGB(255, 10, 76, 143),
-          Color.fromARGB(255, 45, 44, 46),
-        ],
-      ),
+      home: const WeatherPage(),
     );
   }
 }

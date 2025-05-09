@@ -32,6 +32,39 @@ class _WeatherPageState extends State<WeatherPage> {
     _initializeApp();
   }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  Future<void> _initializeApp() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _useFahrenheit = prefs.getBool('useFahrenheit') ?? false;
+      String? savedLocation = prefs.getString('savedLocation');
+
+      if (savedLocation == null) {
+        Position position = await _getCurrentLocation();
+        savedLocation = '${position.latitude},${position.longitude}';
+        await prefs.setString('savedLocation', savedLocation);
+      }
+
+      final parts = savedLocation.split(',');
+      final lat = double.tryParse(parts[0]) ?? 0.0;
+      final lon = double.tryParse(parts[1]) ?? 0.0;
+      final name = await _locationService.getLocationName(lat, lon);
+
+      setState(() {
+        _currentLocation = savedLocation!;
+        _locationName = name;
+        _weatherData = _weatherService.fetchWeatherData(savedLocation);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error al iniciar la app: $e';
+        _isLoading = false;
+      });
+=======
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
 Future<void> _initializeApp() async {
   try {
     final prefs = await SharedPreferences.getInstance();
@@ -45,6 +78,10 @@ Future<void> _initializeApp() async {
         debugPrint('No se pudo obtener la ubicación actual. Usando valor por defecto.');
         savedLocation = 'Lleida';
       }
+<<<<<<< HEAD
+=======
+>>>>>>> main
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
     }
 
     setState(() {

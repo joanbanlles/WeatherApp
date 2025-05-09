@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+<<<<<<< HEAD
 import 'package:weather_app/screens/cityScreen.dart';
 import '../models/weather_data.dart';
+=======
+<<<<<<< HEAD
+=======
+import 'package:weather_app/screens/cityScreen.dart';
+import '../models/weather_data.dart';
+>>>>>>> main
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:weather_app/models/weather_data.dart';
 import 'package:weather_app/screens/cityScreen.dart';
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+class HomeScreen extends StatefulWidget {
+=======
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
 class WeatherScreen extends StatefulWidget {
   @override
   _WeatherScreenState createState() => _WeatherScreenState();
@@ -71,6 +85,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
 }
 
 class HomeScreen extends StatelessWidget {
+<<<<<<< HEAD
+=======
+>>>>>>> main
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
   final WeatherData weatherData;
   final String location;
   final bool useFahrenheit;
@@ -121,6 +139,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    final current = widget.weatherData.current;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 16,
+        left: 16,
+        right: 16,
+        bottom: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLocationHeader(),
+          const SizedBox(height: 24),
+          _buildCurrentWeatherCard(current),
+          const SizedBox(height: 24),
+          _buildHourlyForecast(widget.weatherData.hourly),
+          const SizedBox(height: 24),
+          _buildDailyForecast(widget.weatherData.daily),
+        ],
+=======
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
     return Scaffold(
       body: Container(
         decoration: buildGradientBackground(),
@@ -141,11 +184,43 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+<<<<<<< HEAD
+=======
+>>>>>>> main
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
       ),
     );
   }
 
   Widget _buildLocationHeader() {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    return Center(
+      child: Column(
+        children: [
+          Text(
+            widget.location,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            DateFormat('EEEE, d MMMM', 'es_ES').format(DateTime.now()),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w300,
+              color: Colors.white70,
+            ),
+          ),
+        ],
+=======
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -231,6 +306,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+<<<<<<< HEAD
+=======
+>>>>>>> main
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
       ),
     );
   }

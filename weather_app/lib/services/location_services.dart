@@ -33,7 +33,15 @@ class LocationService {
   }
 
   Future<String> getLocationName(double latitude, double longitude) async {
+<<<<<<< HEAD
     const apiKey = '43201f42c6be4d379c6133011252404';
+=======
+<<<<<<< HEAD
+    const apiKey = '946bdb8c833d4ec8982f0ed9cf784244'; // Reemplaza con tu API Key de OpenCage
+=======
+    const apiKey = '43201f42c6be4d379c6133011252404';
+>>>>>>> main
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
     final url =
         'https://api.opencagedata.com/geocode/v1/json?q=$latitude+$longitude&key=$apiKey';
 
@@ -53,6 +61,47 @@ class LocationService {
     }
   }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+Future<List<String>> searchCitySuggestions(String query) async {
+  const apiKey = '946bdb8c833d4ec8982f0ed9cf784244'; // tu API key
+  final url =
+      'https://api.opencagedata.com/geocode/v1/json?q=$query&key=$apiKey&limit=5&language=es';
+
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    final results = data['results'] as List<dynamic>;
+
+    final suggestions = <String>{}; // Usamos un Set para evitar duplicados
+
+    for (final item in results) {
+      final components = item['components'] ?? {};
+      final name = components['city'] ??
+                   components['town'] ??
+                   components['village'] ??
+                   components['municipality'] ??
+                   components['county'] ??
+                   components['state'];
+      if (name != null) {
+        suggestions.add(name.toString());
+      }
+    }
+
+    return suggestions.toList();
+  } else {
+    throw Exception('Error al buscar sugerencias');
+  }
+}
+
+
+
+
+
+=======
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
   static Future<String> getCurrentLocationName() async {
     final locationService = LocationService();
     try {
@@ -69,4 +118,8 @@ class LocationService {
       return 'Error al obtener la ubicación';
     }
   }
+<<<<<<< HEAD
+=======
+>>>>>>> main
+>>>>>>> d5e05d3df7dc94e77017f44edc2249838fb819cd
 }

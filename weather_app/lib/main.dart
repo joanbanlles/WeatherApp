@@ -19,28 +19,55 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Clima Simple',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0E21),
-        fontFamily: 'Roboto',
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF1E88E5),
-          secondary: Color(0xFF42A5F5),
-        ),
-        cardTheme: CardTheme(
-          color: const Color(0xFF1D1E33),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+    return Container(
+      child: MaterialApp(
+        title: 'Clima Simple',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.dark().copyWith(
+          colorScheme: ColorScheme.dark(
+            primary: Color.fromARGB(255, 10, 76, 143),
+            secondary: Color.fromARGB(255, 45, 44, 46),
           ),
-          elevation: 6,
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+          cardTheme: CardTheme(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            color: const Color(0xFF1D1E33),
+          ),
         ),
+        home: const WeatherPage(),
       ),
-      home: const WeatherPage(),
     );
   }
+}
+
+class WeatherPage extends StatelessWidget {
+  const WeatherPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: buildGradientBackground(),
+        child: Center(
+          child: Text('Weather Page', style: TextStyle(color: Colors.white)),
+        ),
+      ),
+    );
+  }
+
+    BoxDecoration buildGradientBackground() {
+    return const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color.fromARGB(255, 10, 76, 143),
+          Color.fromARGB(255, 45, 44, 46),
+        ],
+      ),
+    );
+  }
+
 }
